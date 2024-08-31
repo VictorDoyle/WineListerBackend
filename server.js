@@ -10,7 +10,13 @@ const { body, validationResult } = require('express-validator');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+    //origin: 'http://localhost:8081', // change to ?? prod later
+    origin: '*', // do wildcard while testing switch back to dev ? prod
+    methods: ['GET', 'POST', 'PUT', 'OPTIONS', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(bodyParser.json());
 
 // MySQL init
@@ -29,8 +35,6 @@ const pool = mysql.createPool({
     connectionLimit: 10, // keep low in dev but max 115 in prod
     queueLimit: 0, // non limited Q length; req stay in Q if non available, use this to balance later
     waitForConnections: true, // if pool full keep to true then build switch on non full
-    acquireTimeout: 10000, // ms timeout -- idk yet but keep this for safety and stagger
-    connectionIdleTimeout: 30000, // ms timeout --- clean out idles and timeouts to clear up q
     debug: false // keep handy for dev non prod
 });
 
@@ -114,13 +118,54 @@ app.post('/login',
                     return res.status(401).send('Invalid credentials');
                 }
 
-                // Generate token
-                const token = generateToken(user.id);
-                res.status(200).json({ token });
+                res.status(200).json({
+                    name: user.name,
+                    userId: user.id,
+                    username: user.username,
+                });
             });
         });
     }
 );
+
+
+/* SECTION: profile route */
+app.get('/profile/:userId', (req, res) => {
+    const { userId } = req.params;
+    console.error('Received userId:', userId);
+
+    if (!userId) {
+        return res.status(400).send('User ID is required');
+    }
+
+    const query = 'SELECT * FROM users WHERE id = ?';
+    pool.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            return res.status(500).send('Server error');
+        }
+        if (results.length === 0) {
+            return res.status(404).send('User not found');
+        }
+
+        const user = results[0];
+        // log it for now
+        console.error('User data:', {
+            name: user.name,
+            userId: user.id,
+            username: user.username,
+        });
+
+        res.status(200).json({
+            name: user.name,
+            userId: user.id,
+            username: user.username,
+        });
+    });
+});
+
+
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
