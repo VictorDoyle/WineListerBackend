@@ -26,7 +26,12 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    connectionLimit: 10,
+    connectionLimit: 10, // keep low in dev but max 115 in prod
+    queueLimit: 0, // non limited Q length; req stay in Q if non available, use this to balance later
+    waitForConnections: true, // if pool full keep to true then build switch on non full
+    acquireTimeout: 10000, // ms timeout -- idk yet but keep this for safety and stagger
+    connectionIdleTimeout: 30000, // ms timeout --- clean out idles and timeouts to clear up q
+    debug: false // keep handy for dev non prod
 });
 
 connection.connect(err => {
