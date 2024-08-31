@@ -15,3 +15,9 @@ WineLister is a comprehensive wine tracking application built with React Native.
 - **Vintage Insights**: Receive expert recommendations on the best years for your favorite wines.  
 - **Personal Notes**: Add custom notes to remember tasting experiences and special moments.  
 - **Share Your Lists With Friends**: Ever wanted to compare and share notes on your favorite wines? Send your customized lists to friends.
+
+### Setup
+
+- `npm ci`
+- setup local `mysql -u root -p`
+- `npm run start`
