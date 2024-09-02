@@ -4,7 +4,8 @@
   "description": "Backend for WineLister",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "setup-db": "node database/setup-database.js"
   },
   "keywords": [],
   "author": "Victor Doyle",
